@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hey Jasper — People Intelligence Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --card: #161616;
+      --border: rgba(255,255,255,0.07);
+      --accent: #C8FF00;
+      --accent2: #00FFD1;
+      --text: #F0F0F0;
+      --muted: #888;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+    }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 5%;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      background: rgba(8,8,8,0.7);
+      animation: fadeDown 0.8s ease both;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .logo-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 2px;
+      margin-bottom: 2px;
+    }
+
+    .logo-dots i {
+      display: block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: dotBlink 1.4s infinite ease-in-out;
+      font-style: normal;
+    }
+
+    .logo-dots i:nth-child(2) { animation-delay: 0.2s; }
+    .logo-dots i:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dotBlink {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+      40%           { opacity: 1;   transform: scale(1.2); }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #000 !important;
+      padding: 0.55rem 1.3rem;
+      border-radius: 2px;
+      font-weight: 600 !important;
+      font-size: 0.82rem !important;
+      letter-spacing: 0.06em !important;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 5% 7rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(200,255,0,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 70%, rgba(0,255,209,0.05) 0%, transparent 60%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(200,255,0,0.08);
+      border: 1px solid rgba(200,255,0,0.2);
+      color: var(--accent);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      width: fit-content;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 800;
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      max-width: 900px;
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,255,255,0.25);
+    }
+
+    .hero-sub {
+      margin-top: 2.5rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      animation: fadeUp 0.8s 0.7s ease both;
+    }
+
+    .hero-desc {
+      max-width: 380px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      padding: 1rem 2rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(200,255,0,0.25);
+    }
+
+    .btn-ghost {
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .btn-ghost:hover { color: var(--text); }
+    .btn-ghost::after { content: '→'; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* MARQUEE */
+    .marquee-section {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 0;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .marquee-track {
+      display: flex;
+      gap: 4rem;
+      width: max-content;
+      animation: marquee 25s linear infinite;
+    }
+
+    .marquee-track span {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .marquee-track span b { color: var(--accent); margin-right: 0.5rem; }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* SERVICES */
+    section { padding: 8rem 5%; }
+
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 4rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .service-card {
+      background: var(--card);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .service-card:hover::before { transform: scaleX(1); }
+    .service-card:hover { background: #1c1c1c; }
+
+    .service-num {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+    }
+
+    .service-icon {
+      font-size: 2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .service-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .service-card p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* STATS */
+    .stats-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 6rem 5%;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem;
+    }
+
+    .stat-item { text-align: center; }
+
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5rem);
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* WORK */
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .work-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16/10;
+      cursor: pointer;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+
+    .work-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(200,255,0,0.2);
+    }
+
+    .work-card:first-child {
+      grid-column: 1 / -1;
+      aspect-ratio: 16/6;
+    }
+
+    .work-visual {
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .work-visual svg { width: 100%; height: 100%; }
+
+    .work-card:nth-child(1) .work-visual { background: linear-gradient(135deg, #080e1f 0%, #0d1a3a 60%, #0a1628 100%); }
+    .work-card:nth-child(2) .work-visual { background: linear-gradient(135deg, #080f0a 0%, #0a1f10 60%, #081409 100%); }
+    .work-card:nth-child(3) .work-visual { background: linear-gradient(135deg, #100808 0%, #1f0d0a 60%, #180a08 100%); }
+
+    .work-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .work-card:hover .work-overlay { opacity: 1; }
+
+    .work-overlay h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .work-overlay p { color: var(--muted); font-size: 0.85rem; }
+
+    .work-tag {
+      position: absolute;
+      top: 1.2rem; left: 1.2rem;
+      background: rgba(200,255,0,0.15);
+      border: 1px solid rgba(200,255,0,0.3);
+      color: var(--accent);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      border-radius: 2px;
+    }
+
+    /* TESTIMONIAL */
+    .testimonial-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 8rem 5%;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .testimonial-card::before {
+      content: '"';
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: var(--accent);
+      opacity: 0.15;
+      position: absolute;
+      top: 0.5rem; left: 1.5rem;
+      line-height: 1;
+    }
+
+    .testimonial-text {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+      padding-top: 1rem;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .author-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      background: rgba(200,255,0,0.1);
+      border: 1px solid rgba(200,255,0,0.2);
+    }
+
+    .author-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .author-role { color: var(--muted); font-size: 0.78rem; }
+
+    /* CTA */
+    .cta-section {
+      padding: 8rem 5%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(200,255,0,0.06) 0%, transparent 70%);
+    }
+
+    .cta-section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      max-width: 400px;
+      margin: 0 auto 3rem;
+      font-weight: 300;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero-sub { flex-direction: column; gap: 2rem; align-items: flex-start; }
+      .work-grid { grid-template-columns: 1fr; }
+      .work-card:first-child { grid-column: auto; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="logo">Hey <span>Jasper</span><span class="logo-dots"><i></i><i></i><i></i></span></a>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact" class="nav-cta">Let's Talk</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-badge">✦ People Intelligence, Instantly</div>
+    <h1>Find Anyone.<br><em>Reach</em> the Right <em>People</em></h1>
+    <div class="hero-sub">
+      <p class="hero-desc">
+        Hey Jasper helps you instantly look up people by email, name, or company — uncover decision makers, retrieve their contact details, and access the data you need to close deals faster.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Get Started Free</a>
+        <a href="#services" class="btn-ghost">See How It Works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <span><b>✦</b> Person Lookup by Email</span>
+      <span><b>✦</b> Lookup by Name & Company</span>
+      <span><b>✦</b> Decision Maker Discovery</span>
+      <span><b>✦</b> Contact Details Retrieval</span>
+      <span><b>✦</b> Company Intelligence</span>
+      <span><b>✦</b> Data Enrichment</span>
+      <span><b>✦</b> Person Lookup by Email</span>
+      <span><b>✦</b> Lookup by Name & Company</span>
+      <span><b>✦</b> Decision Maker Discovery</span>
+      <span><b>✦</b> Contact Details Retrieval</span>
+      <span><b>✦</b> Company Intelligence</span>
+      <span><b>✦</b> Data Enrichment</span>
+    </div>
+  </div>
+
+  <section id="services">
+    <p class="section-label reveal">What We Do</p>
+    <h2 class="section-title reveal">Intelligence Tools<br>Built for Outreach</h2>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01</div>
+        <div class="service-icon">◈</div>
+        <h3>Person Lookup by Email</h3>
+        <p>Enter any email address and instantly retrieve the person's full profile — name, role, company, and associated contact data in seconds.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">02</div>
+        <div class="service-icon">⬡</div>
+        <h3>Lookup by Name & Company</h3>
+        <p>Search by a person's name and their company to pinpoint the exact individual you're looking for, with verified details returned instantly.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">03</div>
+        <div class="service-icon">◎</div>
+        <h3>Decision Maker Discovery</h3>
+        <p>Identify the key decision makers at any company — CEOs, VPs, Directors, and more — so you always know exactly who to reach out to.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">04</div>
+        <div class="service-icon">⬢</div>
+        <h3>Contact Details & Data Retrieval</h3>
+        <p>Retrieve verified emails, phone numbers, LinkedIn profiles, and all available data on your targets — everything you need to make contact.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-item reveal">
+        <div class="stat-num">500M+</div>
+        <div class="stat-label">People in Database</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-num">95%</div>
+        <div class="stat-label">Data Accuracy Rate</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-num">&lt;2s</div>
+        <div class="stat-label">Average Lookup Time</div>
+      </div>
+      <div class="stat-item reveal">
+        <div class="stat-num">50+</div>
+        <div class="stat-label">Data Points per Profile</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USE CASES -->
+  <section id="work">
+    <p class="section-label reveal">Use Cases</p>
+    <h2 class="section-title reveal">Who Uses<br>Hey Jasper?</h2>
+    <div class="work-grid">
+
+      <!-- SALES TEAMS -->
+      <div class="work-card reveal">
+        <div class="work-visual">
+          <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <pattern id="grid1" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(200,255,0,0.06)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="900" height="340" fill="url(#grid1)"/>
+            <rect x="60" y="60" width="140" height="220" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="130" y="85" fill="rgba(255,255,255,0.4)" font-size="11" text-anchor="middle" font-family="monospace">LEADS</text>
+            <rect x="74" y="96" width="112" height="44" rx="4" fill="rgba(200,255,0,0.08)" stroke="rgba(200,255,0,0.25)" stroke-width="1"/>
+            <circle cx="92" cy="112" r="10" fill="rgba(200,255,0,0.15)"/>
+            <text x="92" y="116" fill="#C8FF00" font-size="9" text-anchor="middle">JD</text>
+            <rect x="108" y="107" width="60" height="6" rx="3" fill="rgba(255,255,255,0.15)"/>
+            <rect x="108" y="118" width="40" height="4" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <rect x="74" y="148" width="112" height="44" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <circle cx="92" cy="164" r="10" fill="rgba(255,255,255,0.08)"/>
+            <text x="92" y="168" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">MK</text>
+            <rect x="108" y="159" width="55" height="6" rx="3" fill="rgba(255,255,255,0.1)"/>
+            <rect x="108" y="170" width="35" height="4" rx="2" fill="rgba(255,255,255,0.05)"/>
+            <rect x="74" y="200" width="112" height="44" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <circle cx="92" cy="216" r="10" fill="rgba(255,255,255,0.08)"/>
+            <text x="92" y="220" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">AL</text>
+            <rect x="108" y="211" width="50" height="6" rx="3" fill="rgba(255,255,255,0.1)"/>
+            <rect x="108" y="222" width="38" height="4" rx="2" fill="rgba(255,255,255,0.05)"/>
+            <rect x="220" y="60" width="140" height="220" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="290" y="85" fill="rgba(255,255,255,0.4)" font-size="11" text-anchor="middle" font-family="monospace">QUALIFIED</text>
+            <rect x="234" y="96" width="112" height="44" rx="4" fill="rgba(200,255,0,0.06)" stroke="rgba(200,255,0,0.15)" stroke-width="1"/>
+            <circle cx="252" cy="112" r="10" fill="rgba(200,255,0,0.12)"/>
+            <text x="252" y="116" fill="#C8FF00" font-size="9" text-anchor="middle">SR</text>
+            <rect x="268" y="107" width="60" height="6" rx="3" fill="rgba(255,255,255,0.12)"/>
+            <rect x="268" y="118" width="42" height="4" rx="2" fill="rgba(255,255,255,0.06)"/>
+            <rect x="234" y="148" width="112" height="44" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <circle cx="252" cy="164" r="10" fill="rgba(255,255,255,0.08)"/>
+            <text x="252" y="168" fill="rgba(255,255,255,0.35)" font-size="9" text-anchor="middle">TL</text>
+            <rect x="268" y="159" width="50" height="6" rx="3" fill="rgba(255,255,255,0.1)"/>
+            <rect x="268" y="170" width="30" height="4" rx="2" fill="rgba(255,255,255,0.05)"/>
+            <rect x="380" y="60" width="140" height="220" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="450" y="85" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" font-family="monospace">CONTACTED</text>
+            <rect x="394" y="96" width="112" height="44" rx="4" fill="rgba(200,255,0,0.1)" stroke="rgba(200,255,0,0.3)" stroke-width="1"/>
+            <circle cx="412" cy="112" r="10" fill="rgba(200,255,0,0.2)"/>
+            <text x="412" y="116" fill="#C8FF00" font-size="9" text-anchor="middle">VP</text>
+            <rect x="428" y="107" width="62" height="6" rx="3" fill="rgba(255,255,255,0.15)"/>
+            <rect x="428" y="118" width="44" height="4" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <!-- Jasper lookup panel -->
+            <rect x="560" y="50" width="300" height="240" rx="8" fill="rgba(12,12,12,0.92)" stroke="rgba(200,255,0,0.3)" stroke-width="1.5"/>
+            <rect x="560" y="50" width="300" height="36" rx="8" fill="rgba(200,255,0,0.08)"/>
+            <circle cx="580" cy="68" r="6" fill="rgba(200,255,0,0.6)"/>
+            <text x="595" y="72" fill="#C8FF00" font-size="11" font-family="monospace" font-weight="bold">Hey Jasper</text>
+            <circle cx="838" cy="65" r="4" fill="#C8FF00"><animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite" begin="0s"/></circle>
+            <circle cx="848" cy="65" r="4" fill="#C8FF00"><animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite" begin="0.2s"/></circle>
+            <circle cx="858" cy="65" r="4" fill="#C8FF00"><animate attributeName="opacity" values="1;0.2;1" dur="1.4s" repeatCount="indefinite" begin="0.4s"/></circle>
+            <rect x="574" y="98" width="272" height="28" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(200,255,0,0.2)" stroke-width="1"/>
+            <text x="584" y="116" fill="rgba(200,255,0,0.7)" font-size="10" font-family="monospace">sarah.reynolds@techcorp.com</text>
+            <circle cx="592" cy="160" r="20" fill="rgba(200,255,0,0.12)" stroke="rgba(200,255,0,0.3)" stroke-width="1.5"/>
+            <text x="592" y="165" fill="#C8FF00" font-size="14" text-anchor="middle" font-weight="bold">SR</text>
+            <text x="622" y="152" fill="rgba(255,255,255,0.9)" font-size="12" font-weight="bold" font-family="monospace">Sarah Reynolds</text>
+            <text x="622" y="165" fill="rgba(200,255,0,0.7)" font-size="10" font-family="monospace">VP of Sales · TechCorp</text>
+            <text x="622" y="178" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace">San Francisco, CA</text>
+            <rect x="574" y="195" width="272" height="1" fill="rgba(255,255,255,0.06)"/>
+            <rect x="594" y="206" width="160" height="7" rx="3" fill="rgba(200,255,0,0.15)"/>
+            <rect x="594" y="222" width="110" height="7" rx="3" fill="rgba(255,255,255,0.08)"/>
+            <rect x="594" y="238" width="140" height="7" rx="3" fill="rgba(255,255,255,0.08)"/>
+            <path d="M 540 170 Q 555 170 560 160" stroke="rgba(200,255,0,0.4)" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+          </svg>
+        </div>
+        <div class="work-tag">Sales Teams</div>
+        <div class="work-overlay">
+          <h3>B2B Sales & SDRs</h3>
+          <p>Find and reach decision makers before the competition does</p>
+        </div>
+      </div>
+
+      <!-- RECRUITERS -->
+      <div class="work-card reveal">
+        <div class="work-visual">
+          <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <pattern id="grid2" width="30" height="30" patternUnits="userSpaceOnUse">
+                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(0,255,180,0.05)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="420" height="260" fill="url(#grid2)"/>
+            <rect x="22" y="24" width="168" height="212" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="106" y="48" fill="rgba(255,255,255,0.35)" font-size="10" text-anchor="middle" font-family="monospace">CANDIDATES</text>
+            <circle cx="50" cy="78" r="14" fill="rgba(0,255,180,0.08)" stroke="rgba(0,255,180,0.15)" stroke-width="1"/>
+            <text x="50" y="82" fill="rgba(0,255,180,0.5)" font-size="9" text-anchor="middle">AC</text>
+            <rect x="72" y="70" width="88" height="6" rx="3" fill="rgba(255,255,255,0.1)"/>
+            <rect x="72" y="81" width="60" height="4" rx="2" fill="rgba(255,255,255,0.05)"/>
+            <line x1="34" y1="104" x2="178" y2="104" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <circle cx="50" cy="124" r="14" fill="rgba(0,255,180,0.18)" stroke="rgba(0,255,180,0.4)" stroke-width="1.5"/>
+            <text x="50" y="128" fill="#00FFB4" font-size="9" text-anchor="middle" font-weight="bold">KP</text>
+            <rect x="72" y="116" width="92" height="6" rx="3" fill="rgba(255,255,255,0.2)"/>
+            <rect x="72" y="127" width="64" height="4" rx="2" fill="rgba(0,255,180,0.2)"/>
+            <rect x="166" y="114" width="18" height="18" rx="3" fill="rgba(0,255,180,0.15)" stroke="rgba(0,255,180,0.4)" stroke-width="1"/>
+            <text x="175" y="126" fill="#00FFB4" font-size="11" text-anchor="middle">✓</text>
+            <line x1="34" y1="150" x2="178" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <circle cx="50" cy="170" r="14" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="50" y="174" fill="rgba(255,255,255,0.25)" font-size="9" text-anchor="middle">RJ</text>
+            <rect x="72" y="162" width="75" height="6" rx="3" fill="rgba(255,255,255,0.07)"/>
+            <rect x="72" y="173" width="50" height="4" rx="2" fill="rgba(255,255,255,0.04)"/>
+            <line x1="34" y1="196" x2="178" y2="196" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <circle cx="50" cy="216" r="14" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="50" y="220" fill="rgba(255,255,255,0.25)" font-size="9" text-anchor="middle">NW</text>
+            <rect x="72" y="208" width="80" height="6" rx="3" fill="rgba(255,255,255,0.07)"/>
+            <rect x="72" y="219" width="55" height="4" rx="2" fill="rgba(255,255,255,0.04)"/>
+            <!-- Profile card -->
+            <rect x="208" y="24" width="196" height="212" rx="8" fill="rgba(8,8,8,0.95)" stroke="rgba(0,255,180,0.3)" stroke-width="1.5"/>
+            <circle cx="306" cy="74" r="32" fill="rgba(0,255,180,0.1)" stroke="rgba(0,255,180,0.3)" stroke-width="2"/>
+            <text x="306" y="80" fill="#00FFB4" font-size="22" text-anchor="middle" font-weight="bold">KP</text>
+            <text x="306" y="124" fill="rgba(255,255,255,0.9)" font-size="12" text-anchor="middle" font-family="monospace" font-weight="bold">Kate Park</text>
+            <text x="306" y="138" fill="rgba(0,255,180,0.7)" font-size="9" text-anchor="middle" font-family="monospace">Sr. Engineer · Stripe</text>
+            <rect x="218" y="150" width="45" height="16" rx="8" fill="rgba(0,255,180,0.08)" stroke="rgba(0,255,180,0.2)" stroke-width="1"/>
+            <text x="241" y="161" fill="rgba(0,255,180,0.8)" font-size="8" text-anchor="middle">Python</text>
+            <rect x="270" y="150" width="36" height="16" rx="8" fill="rgba(0,255,180,0.08)" stroke="rgba(0,255,180,0.2)" stroke-width="1"/>
+            <text x="288" y="161" fill="rgba(0,255,180,0.8)" font-size="8" text-anchor="middle">AWS</text>
+            <rect x="313" y="150" width="42" height="16" rx="8" fill="rgba(0,255,180,0.08)" stroke="rgba(0,255,180,0.2)" stroke-width="1"/>
+            <text x="334" y="161" fill="rgba(0,255,180,0.8)" font-size="8" text-anchor="middle">React</text>
+            <rect x="218" y="176" width="172" height="1" fill="rgba(255,255,255,0.06)"/>
+            <text x="218" y="195" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace">✉  kate.park@stripe.com</text>
+            <text x="218" y="211" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace">🔗  linkedin.com/in/katepark</text>
+            <text x="218" y="227" fill="rgba(255,255,255,0.4)" font-size="9" font-family="monospace">📍  New York, NY</text>
+            <path d="M 192 124 Q 200 124 208 124" stroke="rgba(0,255,180,0.5)" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/>
+          </svg>
+        </div>
+        <div class="work-tag">Recruiters</div>
+        <div class="work-overlay">
+          <h3>Talent Acquisition</h3>
+          <p>Source and contact top candidates directly with verified info</p>
+        </div>
+      </div>
+
+      <!-- MARKETERS -->
+      <div class="work-card reveal">
+        <div class="work-visual">
+          <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <pattern id="grid3" width="30" height="30" patternUnits="userSpaceOnUse">
+                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,120,80,0.05)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="420" height="260" fill="url(#grid3)"/>
+            <polygon points="80,30 340,30 280,120 120,120" fill="rgba(255,120,80,0.08)" stroke="rgba(255,120,80,0.2)" stroke-width="1.5"/>
+            <text x="210" y="86" fill="rgba(255,130,80,0.7)" font-size="11" text-anchor="middle" font-family="monospace">5,200 Prospects</text>
+            <polygon points="120,128 280,128 240,192 160,192" fill="rgba(255,120,80,0.13)" stroke="rgba(255,120,80,0.3)" stroke-width="1.5"/>
+            <text x="200" y="167" fill="rgba(255,140,80,0.85)" font-size="10" text-anchor="middle" font-family="monospace">1,840 Qualified</text>
+            <polygon points="160,200 240,200 222,236 178,236" fill="rgba(255,120,80,0.22)" stroke="rgba(255,120,80,0.55)" stroke-width="1.5"/>
+            <text x="200" y="223" fill="rgba(255,160,80,1)" font-size="9" text-anchor="middle" font-family="monospace">312 Converted</text>
+            <!-- enrichment panel -->
+            <rect x="278" y="44" width="130" height="160" rx="6" fill="rgba(10,10,10,0.92)" stroke="rgba(255,120,80,0.3)" stroke-width="1"/>
+            <text x="343" y="64" fill="rgba(255,120,80,0.8)" font-size="9" text-anchor="middle" font-family="monospace">ENRICHED DATA</text>
+            <rect x="290" y="74" width="106" height="6" rx="3" fill="rgba(255,120,80,0.25)"/>
+            <rect x="290" y="85" width="80" height="5" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <rect x="290" y="95" width="92" height="5" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <rect x="290" y="110" width="106" height="1" fill="rgba(255,255,255,0.05)"/>
+            <rect x="290" y="118" width="106" height="6" rx="3" fill="rgba(255,120,80,0.15)"/>
+            <rect x="290" y="129" width="75" height="5" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <rect x="290" y="139" width="88" height="5" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <rect x="290" y="154" width="106" height="1" fill="rgba(255,255,255,0.05)"/>
+            <rect x="290" y="162" width="106" height="6" rx="3" fill="rgba(255,120,80,0.1)"/>
+            <rect x="290" y="173" width="60" height="5" rx="2" fill="rgba(255,255,255,0.07)"/>
+            <!-- stat badges -->
+            <rect x="24" y="186" width="104" height="56" rx="6" fill="rgba(10,10,10,0.92)" stroke="rgba(255,120,80,0.25)" stroke-width="1"/>
+            <text x="76" y="212" fill="rgba(255,120,80,1)" font-size="20" text-anchor="middle" font-family="monospace" font-weight="bold">6%</text>
+            <text x="76" y="230" fill="rgba(255,255,255,0.35)" font-size="8" text-anchor="middle" font-family="monospace">Conversion Rate</text>
+            <rect x="138" y="186" width="110" height="56" rx="6" fill="rgba(10,10,10,0.92)" stroke="rgba(255,120,80,0.15)" stroke-width="1"/>
+            <text x="193" y="212" fill="rgba(255,255,255,0.65)" font-size="20" text-anchor="middle" font-family="monospace" font-weight="bold">2.1×</text>
+            <text x="193" y="230" fill="rgba(255,255,255,0.35)" font-size="8" text-anchor="middle" font-family="monospace">Reply Rate Lift</text>
+          </svg>
+        </div>
+        <div class="work-tag">Marketers</div>
+        <div class="work-overlay">
+          <h3>Lead Generation</h3>
+          <p>Build targeted prospect lists enriched with real contact data</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <div class="testimonial-section" id="about">
+    <p class="section-label reveal">Testimonials</p>
+    <h2 class="section-title reveal">What Our Users Say</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card reveal">
+        <p class="testimonial-text">Hey Jasper cut our prospect research time by 80%. We just type in a name or email and instantly have everything we need to make a warm, informed outreach.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👩</div>
+          <div>
+            <div class="author-name">Sarah Mendes</div>
+            <div class="author-role">Head of Sales, Orbit Technologies</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal">
+        <p class="testimonial-text">Finding the right decision maker used to take days of digging. Now it takes seconds. Hey Jasper has completely changed how our SDR team operates.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">👨</div>
+          <div>
+            <div class="author-name">James Okafor</div>
+            <div class="author-role">VP Revenue, ScaleForce</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal">
+        <p class="testimonial-text">The data accuracy is remarkable. We've verified emails and direct lines that other tools simply couldn't find. It's become a core part of our growth stack.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">🧑</div>
+          <div>
+            <div class="author-name">Lena Park</div>
+            <div class="author-role">Growth Lead, Volt Capital</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contact">
+    <h2 class="reveal">Start Finding<br>People Today</h2>
+    <p class="reveal">Join thousands of sales, marketing, and recruiting teams who use Hey Jasper to reach the right people, faster.</p>
+    <a href="mailto:hello@heyjasper.com" class="btn-primary reveal">Get Early Access</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="logo">Hey <span>Jasper</span><span class="logo-dots"><i></i><i></i><i></i></span></a>
+    <ul class="footer-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#work">Use Cases</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 Hey Jasper. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
